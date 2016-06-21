@@ -1,0 +1,19 @@
+<palette>
+	<paletteName>Black and White</paletteName>
+	<colorspace>
+		<name>RGB</name>
+		<channel>R</channel>
+		<channel>G</channel>
+		<channel>B</channel>
+	</colorspace>
+	<color id="white">
+		<R>255</R>
+		<G>255</G>
+		<B>255</B>
+	</color>
+	<color id="black">
+		<R>0</R>
+		<G>0</G>
+		<B>0</B>
+	</color>
+</palette>

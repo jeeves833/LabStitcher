@@ -1,0 +1,14 @@
+<palette>
+	<paletteName>Test</paletteName>
+	<colorspace>
+		<name>LAB</name>
+		<channel>L</channel>
+		<channel>A</channel>
+		<channel>B</channel>
+	</colorspace>
+	<color id="3713">
+		<L>80.68</L>
+		<A>13.97</A>
+		<B>7.17</B>
+	</color>
+</palette>
