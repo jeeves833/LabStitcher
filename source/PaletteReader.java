@@ -66,7 +66,7 @@ public class PaletteReader {
 	        		channels[j] = Double.parseDouble(channelList.item(0).getChildNodes().item(0).getNodeValue().trim());
 	        	}
 	        	if (colorspaceName.equals("RGB")) {
-	        		channels = ColorConv.RGBtoLAB(channels);
+	        		channels = Color.RGBtoLAB(channels);
 	        	}
 	        	colors[i] = new Color(id, channels);
 	        }
