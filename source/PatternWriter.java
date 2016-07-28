@@ -35,7 +35,7 @@ public class PatternWriter {
 			int numPageCols = (int) Math.ceil((float)colors[0].length / (float)COLUMNS_PER_PAGE);
 
 			// Set up document
-			PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(filename + ".pdf"));
+			PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream("../images/" + filename + ".pdf"));
 			document.open();
 
 			// Create font
@@ -85,7 +85,7 @@ public class PatternWriter {
 					int startCol = pageCol * COLUMNS_PER_PAGE;
 
 					// The number of rows and columns on the page
-					int rowsOnPage = Math.min(ROWS_PER_PAGE, colors.length - startCol);
+					int rowsOnPage = Math.min(ROWS_PER_PAGE, colors.length - startRow);
 					int columnsOnPage = Math.min(COLUMNS_PER_PAGE, colors[0].length - startCol);
 
 					// Set up the table for this page
@@ -95,6 +95,8 @@ public class PatternWriter {
 					// Set marker up for enumerating Columns
 					marker.setPhrase(new Paragraph());
 					marker.setNoWrap(true);
+					marker.setRotation(0);
+					marker.setPadding(2);
 
 					// Place Markers at every tenth column
 					for (int i = startCol; i < startCol + columnsOnPage; i++) {
@@ -126,6 +128,8 @@ public class PatternWriter {
 
 					// Complete the marker row at the top of the page
 					marker.setPhrase(new Paragraph());
+					marker.setRotation(90);
+					marker.setPadding(0);
 					table.addCell(marker);
 					table.completeRow();
 
@@ -224,6 +228,9 @@ public class PatternWriter {
 							}
 
 							// Get symbol for this cell
+							// System.out.println("Writing:");
+							// System.out.println("	Row: " + row);
+							// System.out.println("	Col: " + col);
 							Color currColor = colors[row][col];
 							if (currColor.getSymbol() == "") {
 								currColor.setSymbol(symbols.removeFirst());
@@ -240,6 +247,7 @@ public class PatternWriter {
 						table.completeRow();
 					}
 					document.add(table);
+					document.newPage();
 				}
 			}
 			document.close();

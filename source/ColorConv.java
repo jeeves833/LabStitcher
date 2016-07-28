@@ -114,7 +114,7 @@ public class ColorConv {
 				presentColors.add(replacement);
 
 				// Calculate new error.
-				double[] newLab = new double[]{replacement.get(0), replacement.get(1), replacement.get(2)};
+				double[] newLab = replacement.getChannels();
 
 				for (int i = 0; i < 3; i++) {
 					currError[i] = lab[i] - newLab[i];
@@ -138,36 +138,55 @@ public class ColorConv {
 
 
 				// Convert closest color into RGB and insert into new image
-				double[] newRgb = Color.LABtoRGB(newLab);
+				// double[] newRgb = Color.LABtoRGB(newLab);
 				// System.out.println(Arrays.toString(newRgb));
-				newImg.setRGB(x, y, toRGBint(newRgb));
+				// newImg.setRGB(x, y, toRGBint(newRgb));
 
 			}
 		}
 
-		// // Set up priority queue
-		// PriorityQueue<Color> colorQueue = new PriorityQueue<Color>(presentColors.size(), new MostUsedColor());
+		// Limit color depth to 90 colors
 
-		// // Move elements of PRESENTCOLORS into the queue
-		// Iterator<Color> colorIterator = presentColors.iterator();
-		// while (colorIterator.hasNext()) {
-		// 	colorQueue.offer(colorIterator.next());
-		// }
+		// Set up priority queue
+		Color[] presentArr = new Color[presentColors.size()];
+		presentColors.toArray(presentArr);
+		PriorityQueue<Color> colorQueue = new PriorityQueue<Color>(presentArr.length, new MostUsedColor());
 
+		// Move elements of PRESENTCOLORS into the queue
+		for (int i = 0; i<presentArr.length; i++) {
+			colorQueue.offer(presentArr[i]);
+		}
 
-		// // Limit color depth to 90.  
-		// // CHANGE TO GIVE USER CHOICE
-		// while (colorQueue.size() > 90) {
-		// 	Color lowestColor = colorQueue.remove();
-		// 	for (int y = 0; y < height; y++) {
-		// 		for (int x = 0; x < width; x++) {
+		// Set up new Kd-tree
+		KdTree presentTree = new KdTree(presentArr);
 
-		// 		}
-		// 	}
-		// }
+		System.out.println("Before optimization, " + colorQueue.size() + " colors present.");
+		while (colorQueue.size() > 90) {
+			Color lowestColor = colorQueue.remove();
+			presentTree.delete(lowestColor);
+			Color replacement = KdTree.search(presentTree, lowestColor);
+			colorQueue.remove(replacement);
+			for (int y = 0; y < height; y++) {
+				for (int x = 0; x < width; x++) {
+					if (selectedColors[y][x] == lowestColor) {
+						selectedColors[y][x] = replacement;
+						replacement.incrementStitchNum();
+					}
+				}
+			}
+			colorQueue.offer(replacement);
+		}
 
-		// // Save pattern
-		// PatternWriter.write(selectedColors, saveName, symbolName);
+		System.out.println("After optimization, " + colorQueue.size() + " colors present.");
+
+		for (int y = 0; y < height; y++) {
+			for (int x = 0; x < width ; x++) {
+				newImg.setRGB(x, y, toRGBint(Color.LABtoRGB(selectedColors[y][x].getChannels())));
+			}
+		}
+
+		// Save pattern
+		PatternWriter.write(selectedColors, saveName, symbolName);
 
 		// Return image
 		return newImg;

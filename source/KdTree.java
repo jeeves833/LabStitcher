@@ -87,7 +87,9 @@ public class KdTree {
 		int axis = depth;
 
 		// Select pivot point (median)
-		Color pivotColor = points[axis][points[0].length/2];
+		int leftSize = points[0].length/2;
+		int rightSize = points[0].length - leftSize - 1;
+		Color pivotColor = points[axis][leftSize];
 
 		// Make node out of current color
 		Node node = new Node(pivotColor);
@@ -96,8 +98,6 @@ public class KdTree {
 		double pivot = pivotColor.get(axis);
 
 		// Split sorted lists by median (Maintaining sort order)
-		int leftSize = points[0].length/2;
-		int rightSize = points[0].length - leftSize - 1;
 		Color[][] leftPoints = new Color[dims][leftSize];
 		Color[][] rightPoints = new Color[dims][rightSize];
 		for (int d = 0; d < dims; d++) {
@@ -116,8 +116,9 @@ public class KdTree {
 		}
 
 		// Make children trees
-		node.setLeftChild(nodeCreator(leftPoints, (depth+1)%dims));
-		node.setRightChild(nodeCreator(rightPoints, (depth+1)%dims));
+		int nextDepth = (depth+1)%dims;
+		node.setLeftChild(nodeCreator(leftPoints, nextDepth));
+		node.setRightChild(nodeCreator(rightPoints, nextDepth));
 		return node;
 	}
 
@@ -161,7 +162,8 @@ public class KdTree {
 		Node primary, secondary;
 
 		// If QUERY is left of the pivot plane
-		if (query.get(axis) < pivot) {
+		double queryValue = query.get(axis);
+		if (queryValue < pivot) {
 			primary = root.getLeftChild();
 			secondary = root.getRightChild();
 		}
@@ -175,12 +177,13 @@ public class KdTree {
 		int dims = pivotColor.getDims();
 
 		// Search the first subtree
-		search(primary, query, (depth+1)%dims);
+		int nextDepth = (depth+1)%dims;
+		search(primary, query, nextDepth);
 
 		// If second subtree is within BEST_DIST of the query
-		if (best_dist > Math.pow(query.get(axis) - pivot, 2)) {
+		if (best_dist > Math.pow(queryValue - pivot, 2)) {
 			// Search the second subtree
-			search(secondary, query, (depth+1)%dims);
+			search(secondary, query, nextDepth);
 		}
 	}
 
@@ -197,6 +200,7 @@ public class KdTree {
 			return null;
 		}
 
+		int nextDepth = (depth+1)%dims;
 		// If the current node splits the space in the dimension we want
 		if (depth == dim) {
 
@@ -210,13 +214,13 @@ public class KdTree {
 			} else {
 
 				// Search the left subtree for the minimum
-				return findMin(root.getLeftChild(), dim, (depth+1)%dims);
+				return findMin(root.getLeftChild(), dim, nextDepth);
 			}
 		} else {
 
 			// Need to look down both subtrees
-			return KdTree.min(KdTree.min(findMin(root.getLeftChild(), dim, (depth+1)%dims), 
-				findMin(root.getRightChild(), dim, (depth+1)%dims), dim), 
+			return KdTree.min(KdTree.min(findMin(root.getLeftChild(), dim, nextDepth), 
+				findMin(root.getRightChild(), dim, nextDepth), dim), 
 				root.getColor(), dim);
 		}
 	}
@@ -242,20 +246,22 @@ public class KdTree {
 	private Node delete(Node root, Color element, int depth) {
 		// Reached the end of the tree
 		if (root == null) {
+			System.out.println("Cannot delete node that doesn't exits");
 			return null;
 		}
 
+		int nextDepth = (depth+1)%dims;
 		// Current node is the one we want to delete
 		if (element == root.getColor()) {
 			// If the right subtree exists
 			if (root.getRightChild() != null) {
 				// Find minimum color in right subtree
-				Color newValue = findMin(root.getRightChild(), depth, (depth+1)%dims);
+				Color newValue = findMin(root.getRightChild(), depth, nextDepth);
 				// Set current node's color to the found minimum
 				Node newRoot = new Node(newValue);
 				// Delete found color from the right subtree
 				newRoot.setLeftChild(root.getLeftChild());
-				newRoot.setRightChild(delete(root.getRightChild(), newValue, (depth+1)%dims));
+				newRoot.setRightChild(delete(root.getRightChild(), newValue, nextDepth));
 				// Return root
 				return newRoot;
 			} else 
@@ -264,12 +270,12 @@ public class KdTree {
 				// Set right subtree to the left subtree
 				root.setRightChild(root.getLeftChild());
 				// Find minimum color in right subtree
-				Color newValue = findMin(root.getRightChild(), depth, (depth+1)%dims);
+				Color newValue = findMin(root.getRightChild(), depth, nextDepth);
 				// Set current node's color to the found minimum
 				Node newRoot = new Node(newValue);
 				// Delete found color from right subtree
 				newRoot.setLeftChild(null);
-				newRoot.setRightChild(delete(root.getRightChild(), newValue, (depth+1)%dims));
+				newRoot.setRightChild(delete(root.getRightChild(), newValue, nextDepth));
 				// Return root
 				return newRoot;
 			} else 
@@ -283,12 +289,12 @@ public class KdTree {
 			// If desired node is in left subtree
 			if (element.get(depth) < root.getColor().get(depth)) {
 				// Delete from left subtree
-				root.setLeftChild(delete(root.getLeftChild(), element, (depth+1)%dims));
+				root.setLeftChild(delete(root.getLeftChild(), element, nextDepth));
 			} else 
 			// Desired node is in right subtree
 			{
 				// Delete from right subtree
-				root.setRightChild(delete(root.getRightChild(), element, (depth+1)%dims));
+				root.setRightChild(delete(root.getRightChild(), element, nextDepth));
 			}
 		}
 		return root;

@@ -60,6 +60,10 @@ public class Color {
 		}
 	}
 
+	public double[] getChannels() {
+		return channels;
+	}
+
 	public int getDims() {
 		return dimension;
 	}
