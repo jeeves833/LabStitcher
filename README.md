@@ -23,10 +23,8 @@ To use:
 - Enter the name of the symbol file used for pattern writing
   - e.g. "defaultSymbols"
   - All symbol files must be located in /symbols/
-  - LabStitcher does not yet output patterns so the symbol file will not be used
-    - Will be updated in future releases
 - Enter the name of the resulting pattern
   - All output images will be .png so you just need the name without the tag
     - e.g. "test_dmc"
 - An image of the color compressed image will be saved to the /images/ directory
-- Future releases will see a .pdf of the pattern saved as well
+- The .pdf pattern will be saved in the /images/ directory as well
