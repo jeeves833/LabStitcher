@@ -250,6 +250,9 @@ public class PatternWriter {
 						table.completeRow();
 					}
 					document.add(table);
+					Paragraph pageNum = new Paragraph("Page " + new Integer(pageRow * numPageCols + pageCol + 1).toString(), titleFont);
+					pageNum.setAlignment(Element.ALIGN_RIGHT);
+					document.add(pageNum);
 					document.newPage();
 				}
 			}
