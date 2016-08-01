@@ -48,6 +48,10 @@ public class Color {
 		stitches += 1;
 	}
 
+	public void decrementStitchNum() {
+		stitches -= 1;
+	}
+
 	public int getStitchNum() {
 		return stitches;
 	}

@@ -47,10 +47,11 @@ public class ColorConv {
 			+ img.getHeight() + " stitches high.");
 
 		Boolean useDither = c.readLine("Use dithering? (y/n): ").equals("y");
+		Boolean singleStitch = c.readLine("Use single-stitch optimization? (y/n): ").equals("y");
 		String symbolName = c.readLine("Symbol file: ");
 		String saveName = c.readLine("Save file as: ");
 		System.out.println("Beginning color conversion");
-		BufferedImage newImage = replaceColors(img, reader.getColors(), useDither, saveName, symbolName);
+		BufferedImage newImage = replaceColors(img, reader.getColors(), useDither, saveName, symbolName, singleStitch);
 
 		try {
 			ImageIO.write(newImage, "png", new File("../images/" + saveName + ".png"));
@@ -59,7 +60,7 @@ public class ColorConv {
 		}
 	}
 
-	private static BufferedImage replaceColors(BufferedImage img, Color[] colors, Boolean dither, String saveName, String symbolName){
+	private static BufferedImage replaceColors(BufferedImage img, Color[] colors, Boolean dither, String saveName, String symbolName, Boolean singleOpt){
 		// Create empty BufferedImage the same dimensions as IMG
 		int height = img.getHeight();
 		int width = img.getWidth();
@@ -179,6 +180,11 @@ public class ColorConv {
 
 		System.out.println("After optimization, " + colorQueue.size() + " colors present.");
 
+		// Single Stitch removal
+		if (singleOpt) {
+			removeSingleStitches(selectedColors);	
+		}
+
 		for (int y = 0; y < height; y++) {
 			for (int x = 0; x < width ; x++) {
 				newImg.setRGB(x, y, toRGBint(Color.LABtoRGB(selectedColors[y][x].getChannels())));
@@ -190,6 +196,53 @@ public class ColorConv {
 
 		// Return image
 		return newImg;
+	}
+
+	private static void removeSingleStitches(Color[][] stitches) {
+		// Iterate over all stitches
+		int height = stitches.length;
+		int width = stitches[0].length;
+		for (int y = 0; y < height; y++) {
+			test:
+			for (int x = 0; x < width; x++) {
+
+				// Get color at current space
+				Color currColor = stitches[y][x];
+
+				Color bestMatch = currColor;
+				double d = Double.POSITIVE_INFINITY;
+
+				// Iterate over local 3x3 square
+				for (int localY = Math.max(0, y-1); localY < Math.min(height, y+2); localY++) {
+					for (int localX = Math.max(0, x-1); localX < Math.min(width, x+2); localX++) {
+
+						// If we aren't looking at the current space
+						if (localY != y || localX != x) {
+
+							Color neighbor = stitches[localY][localX];
+
+							// If an identical matching color is found
+							if (currColor == neighbor) {
+								// Move to next square
+								continue test;
+							}
+							double currDistance = currColor.distance2(neighbor);
+
+							// If NEIGHBOR is a better match than the current best
+							if (currDistance < d) {
+								bestMatch = neighbor;
+								d = currDistance;	
+							}
+						}
+					}
+				}
+
+				// Reaching this line means we have a single stitch and need to replace
+				currColor.decrementStitchNum();
+				bestMatch.incrementStitchNum();
+				stitches[y][x] = bestMatch;
+			}
+		}
 	}
 
 	private static double[] toRGBArray(int data) {
