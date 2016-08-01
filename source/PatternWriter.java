@@ -2,8 +2,9 @@ package color;
 
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Random;
  
 import com.itextpdf.text.Document;
 import com.itextpdf.text.Element;
@@ -26,7 +27,8 @@ public class PatternWriter {
 	private static final float BORDER_WIDTH = .75f;
 
 	public static void write(Color[][] colors, String filename, String symbolsFilename) {
-		LinkedList<String> symbols = SymbolReader.readSymbolFile("../symbols/" + symbolsFilename + ".txt");
+		ArrayList<String> symbols = SymbolReader.readSymbolFile("../symbols/" + symbolsFilename + ".txt");
+		Random rand = new Random();
 		Document document = new Document();
 		try
 		{
@@ -38,8 +40,9 @@ public class PatternWriter {
 			PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream("../images/" + filename + ".pdf"));
 			document.open();
 
-			// Create font
+			// Create fonts
 			Font mainFont = FontFactory.getFont(FONT, BaseFont.IDENTITY_H, BaseFont.EMBEDDED, 5.2f);
+			Font titleFont = FontFactory.getFont(FONT, BaseFont.IDENTITY_H, BaseFont.EMBEDDED, 10f);
 			// document.add(new Paragraph("Test", mainf))
 
 			// The marker cell is used for enumerating important rows and columns
@@ -79,7 +82,7 @@ public class PatternWriter {
 			// First iterate over pages rowWise
 			for (int pageRow = 0; pageRow < numPageRows; pageRow++) {
 				for (int pageCol = 0; pageCol < numPageCols; pageCol++) {
-
+					document.add(new Paragraph(filename, titleFont));
 					// The row and column of the top left square in the page
 					int startRow = pageRow * ROWS_PER_PAGE;
 					int startCol = pageCol * COLUMNS_PER_PAGE;
@@ -233,7 +236,7 @@ public class PatternWriter {
 							// System.out.println("	Col: " + col);
 							Color currColor = colors[row][col];
 							if (currColor.getSymbol() == "") {
-								currColor.setSymbol(symbols.removeFirst());
+								currColor.setSymbol(symbols.remove(rand.nextInt(symbols.size())));
 							}
 							cell1.setPhrase(new Paragraph(currColor.getSymbol(), mainFont));
 							// System.out.println(currColor.getSymbol());

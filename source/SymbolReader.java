@@ -1,6 +1,6 @@
 package color;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.io.IOException;
 import java.io.FileReader;
 import java.io.BufferedReader;
@@ -12,8 +12,8 @@ public class SymbolReader {
 		readSymbolFile("../symbols/defaultSymbols.txt");
 	}
 
-	public static LinkedList<String> readSymbolFile(String filename){
-		LinkedList<String> symbols = new LinkedList<String>();
+	public static ArrayList<String> readSymbolFile(String filename){
+		ArrayList<String> symbols = new ArrayList<String>();
 		try {
 			BufferedReader reader = new BufferedReader(new FileReader(filename));
 			while (reader.ready()) {
