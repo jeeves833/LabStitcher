@@ -20,6 +20,9 @@ To use:
   - Images must be located in the /images/ directory
 - Choose if you want the resulting pattern to be dithered ("y" or "n")
   - LabStitcher uses Floyd-Steinberg dithering
+- Choose if you want to apply Single Stitch Optimization to the pattern
+  - This finds stitches that do not have any matching neighbors and replaces them with a closely matching color
+  - Patterns optimized this way will have some compromises visually but will be much easier to stitch
 - Enter the name of the symbol file used for pattern writing
   - e.g. "defaultSymbols"
   - All symbol files must be located in /symbols/
