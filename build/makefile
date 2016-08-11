@@ -1,4 +1,4 @@
-JFLAGS = -g -d
+JFLAGS = -g -Xlint:unchecked -d
 JC = javac
 SOURCE=../source/
 TARGET=./color/

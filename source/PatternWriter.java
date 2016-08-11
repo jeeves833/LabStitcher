@@ -36,6 +36,10 @@ public class PatternWriter {
 			int numPageRows = (int) Math.ceil((float)colors.length / (float)ROWS_PER_PAGE);
 			int numPageCols = (int) Math.ceil((float)colors[0].length / (float)COLUMNS_PER_PAGE);
 
+			// if (numPageRows * numPageCols > 10) {
+				// if (System.console().readline("WARNING")
+			// }
+
 			// Set up document
 			PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream("../images/" + filename + ".pdf"));
 			document.open();

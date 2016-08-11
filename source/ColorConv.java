@@ -14,6 +14,7 @@ import java.io.Console;
 import java.util.HashSet;
 import java.util.PriorityQueue;
 import java.util.Iterator;
+import java.util.ArrayList;
 
 public class ColorConv {
 	
@@ -60,7 +61,7 @@ public class ColorConv {
 		}
 	}
 
-	private static BufferedImage replaceColors(BufferedImage img, Color[] colors, Boolean dither, String saveName, String symbolName, Boolean singleOpt){
+	private static BufferedImage replaceColors(BufferedImage img, ArrayList<Color> colors, Boolean dither, String saveName, String symbolName, Boolean singleOpt){
 		// Create empty BufferedImage the same dimensions as IMG
 		int height = img.getHeight();
 		int width = img.getWidth();
@@ -149,19 +150,19 @@ public class ColorConv {
 		// Limit color depth to 90 colors
 
 		// Set up priority queue
-		Color[] presentArr = new Color[presentColors.size()];
-		presentColors.toArray(presentArr);
-		PriorityQueue<Color> colorQueue = new PriorityQueue<Color>(presentArr.length, new MostUsedColor());
+		ArrayList<Color> presentList = new ArrayList<Color>(presentColors);
+		PriorityQueue<Color> colorQueue = new PriorityQueue<Color>(presentList.size(), new MostUsedColor());
 
 		// Move elements of PRESENTCOLORS into the queue
-		for (int i = 0; i<presentArr.length; i++) {
-			colorQueue.offer(presentArr[i]);
+		for (int i = 0; i<presentList.size(); i++) {
+			colorQueue.offer(presentList.get(i));
 		}
 
 		// Set up new Kd-tree
-		KdTree presentTree = new KdTree(presentArr);
-
 		System.out.println("Before optimization, " + colorQueue.size() + " colors present.");
+		// System.out.println(Arrays.toString(presentList));
+		KdTree presentTree = new KdTree(presentList);
+
 		while (colorQueue.size() > 90) {
 			Color lowestColor = colorQueue.remove();
 			presentTree.delete(lowestColor);
@@ -192,6 +193,7 @@ public class ColorConv {
 		}
 
 		// Save pattern
+		System.out.println("Writing Pattern");
 		PatternWriter.write(selectedColors, saveName, symbolName);
 
 		// Return image

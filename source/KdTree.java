@@ -4,6 +4,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Comparator;
 import java.lang.Math;
+import java.util.Collections;
+import java.util.ArrayList;
 
 public class KdTree {
 
@@ -54,17 +56,17 @@ public class KdTree {
 		}
 	}
 
-	public KdTree(Color[] points) {
+	public KdTree(ArrayList<Color> points) {
 		// Extract number of dimensions
-		dims = points[0].getDims();
+		dims = points.get(0).getDims();
 
 		// Sort points into DIMS sorted lists
-		Color[][] sortedPoints = new Color[dims][points.length];
+		ArrayList<ArrayList<Color>> sortedPoints = new ArrayList<ArrayList<Color>>();
 		for (int i = 0; i < dims; i++) {
-			sortedPoints[i] = Arrays.copyOf(points, points.length);
-			Arrays.sort(sortedPoints[i], new PointComparator(i));
-			// System.out.println(Arrays.toString(sortedPoints[i]));
+			sortedPoints.add(new ArrayList<Color>(points));
+			Collections.sort(sortedPoints.get(i), new PointComparator(i));
 		}
+		// System.out.println(Arrays.toString(sortedPoints[0]));
 		root = nodeCreator(sortedPoints, 0);
 	}
 
@@ -76,9 +78,9 @@ public class KdTree {
 		return dims;
 	}
 
-	private Node nodeCreator(Color[][] points, int depth) {
+	private Node nodeCreator(ArrayList<ArrayList<Color>> points, int depth) {
 		// If number of points is == 0
-		if (points[0].length == 0) {
+		if (points.get(0).size() == 0) {
 			// Return a null node
 			return null;
 		}
@@ -87,32 +89,41 @@ public class KdTree {
 		int axis = depth;
 
 		// Select pivot point (median)
-		int leftSize = points[0].length/2;
-		int rightSize = points[0].length - leftSize - 1;
-		Color pivotColor = points[axis][leftSize];
+		int leftSize = points.get(0).size()/2;
+		int rightSize = points.get(0).size() - leftSize - 1;
+		Color pivotColor = points.get(axis).get(leftSize);
 
 		// Make node out of current color
 		Node node = new Node(pivotColor);
 
 		// Chose pivot plane value
 		double pivot = pivotColor.get(axis);
+		// System.out.println(pivotColor);
+		// System.out.println(points.get(0).size() + " points total");
+		// System.out.println(leftSize + " points to left subtree");
+		// System.out.println(rightSize + " points to right subtree");
 
 		// Split sorted lists by median (Maintaining sort order)
-		Color[][] leftPoints = new Color[dims][leftSize];
-		Color[][] rightPoints = new Color[dims][rightSize];
+		ArrayList<ArrayList<Color>> leftPoints = new ArrayList<ArrayList<Color>>();
+		ArrayList<ArrayList<Color>> rightPoints = new ArrayList<ArrayList<Color>>();
 		for (int d = 0; d < dims; d++) {
-			for (int i = 0, l = 0, r = 0; i < points[d].length; i++) {
-				Color currPoint = points[d][i];
-
+			ArrayList<Color> currLeft = new ArrayList<Color>();
+			ArrayList<Color> currRight = new ArrayList<Color>();
+			ArrayList<Color> currDimPoints = points.get(d);
+			for (int i = 0; i < points.get(d).size(); i++) {
+				Color currPoint = currDimPoints.get(i);
+				// System.out.println(currPoint);
 				// Do not keep the current node value in children lists
 				if (currPoint.get(axis) < pivot) {
-					leftPoints[d][l] = currPoint;
-					l++;
+					// System.out.println("Goes to left subtree");
+					currLeft.add(currPoint);
 				} else if (currPoint != pivotColor) {
-					rightPoints[d][r] = currPoint;
-					r++;
+					// System.out.println("Goes to right tree");
+					currRight.add(currPoint);
 				}
 			}
+			leftPoints.add(currLeft);
+			rightPoints.add(currRight);
 		}
 
 		// Make children trees

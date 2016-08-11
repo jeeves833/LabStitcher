@@ -8,13 +8,14 @@ import javax.xml.parsers.DocumentBuilder;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException; 
 import java.util.Arrays;
+import java.util.ArrayList;
 
 public class PaletteReader {
 
 	String paletteName;
 	String colorspaceName;
 	String[] channelNames;
-	Color[] colors;
+	ArrayList<Color> colors;
 
 	public PaletteReader(File f) {
 		try {
@@ -56,7 +57,7 @@ public class PaletteReader {
 
 	        NodeList colorList = doc.getElementsByTagName("color");
 	        int numOfColors = colorList.getLength();
-	        colors = new Color[numOfColors];
+	        colors = new ArrayList<Color>();
 	        for (int i = 0; i < numOfColors; i++) {
 	        	Element colorElement = (Element) colorList.item(i);
 	        	String id = colorElement.getAttribute("id");
@@ -68,7 +69,7 @@ public class PaletteReader {
 	        	if (colorspaceName.equals("RGB")) {
 	        		channels = Color.RGBtoLAB(channels);
 	        	}
-	        	colors[i] = new Color(id, channels);
+	        	colors.add(new Color(id, channels));
 	        }
 
 	    } catch (SAXParseException e) {
@@ -81,7 +82,7 @@ public class PaletteReader {
 	    }
 	}
 
-	public Color[] getColors() {
+	public ArrayList<Color> getColors() {
 		return colors;
 	}
 
