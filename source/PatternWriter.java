@@ -5,6 +5,7 @@ import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Random;
+import java.util.PriorityQueue;
  
 import com.itextpdf.text.Document;
 import com.itextpdf.text.Element;
@@ -26,8 +27,10 @@ public class PatternWriter {
 	private static final int COLUMNS_PER_PAGE = 83;
 	private static final float BORDER_WIDTH = .75f;
 
-	public static void write(Color[][] colors, String filename, String symbolsFilename) {
+	public static void write(Color[][] colors, String filename, String symbolsFilename, String paletteName) {
 		ArrayList<String> symbols = SymbolReader.readSymbolFile("../symbols/" + symbolsFilename + ".txt");
+		HashSet<Color> presentColors = new HashSet<Color>();
+		float longestId = 0.0f;
 		Random rand = new Random();
 		Document document = new Document();
 		try
@@ -66,15 +69,15 @@ public class PatternWriter {
 			table.addCell(marker);
 			table.completeRow();*/
 
-			// Cell1 is used for the stitch symbols themselves
-			PdfPCell cell1 = new PdfPCell();
-			// cell1.setPhrase(new Paragraph("\u264F", mainFont));
-			cell1.setPadding(0);
-			cell1.setPaddingBottom(1f);
-			cell1.setPaddingTop(-1.5f);
-			cell1.setFixedHeight(6.2f);
-			cell1.setVerticalAlignment(Element.ALIGN_MIDDLE);
-			cell1.setHorizontalAlignment(Element.ALIGN_CENTER);
+			// symbolCell is used for the stitch symbols themselves
+			PdfPCell symbolCell = new PdfPCell();
+			// symbolCell.setPhrase(new Paragraph("\u264F", mainFont));
+			symbolCell.setPadding(0);
+			symbolCell.setPaddingBottom(1f);
+			symbolCell.setPaddingTop(-1.5f);
+			symbolCell.setFixedHeight(6.2f);
+			symbolCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
+			symbolCell.setHorizontalAlignment(Element.ALIGN_CENTER);
 
 			/*marker.setPadding(0);
 			marker.setRotation(90);
@@ -173,31 +176,31 @@ public class PatternWriter {
 			            if (row%10 == 0) {
 
 			            	// Current row has a thicker top border
-			            	cell1.setBorderWidthTop(BORDER_WIDTH/2);
-							cell1.setBorderWidthBottom(BORDER_WIDTH/8);
+			            	symbolCell.setBorderWidthTop(BORDER_WIDTH/2);
+							symbolCell.setBorderWidthBottom(BORDER_WIDTH/8);
 
 			            } else if (row%10 == 9) {
 
 			            	// Current row has a thicker bottom border
-			            	cell1.setBorderWidthTop(BORDER_WIDTH/8);
-							cell1.setBorderWidthBottom(BORDER_WIDTH/2);
+			            	symbolCell.setBorderWidthTop(BORDER_WIDTH/8);
+							symbolCell.setBorderWidthBottom(BORDER_WIDTH/2);
 
 			            } else {
 
 			            	// Current row has no thick borders
-			            	cell1.setBorderWidthBottom(BORDER_WIDTH/8);
-							cell1.setBorderWidthTop(BORDER_WIDTH/8);
+			            	symbolCell.setBorderWidthBottom(BORDER_WIDTH/8);
+							symbolCell.setBorderWidthTop(BORDER_WIDTH/8);
 
 			            }
 
 			            // Set top border of whole pattern
 			            if (row == 0) {
-			            	cell1.setBorderWidthTop(BORDER_WIDTH);
+			            	symbolCell.setBorderWidthTop(BORDER_WIDTH);
 			            }
 
 			            // Set bottom border of whole pattern
 			            if (row == colors.length - 1) {
-			            	cell1.setBorderWidthBottom(BORDER_WIDTH);
+			            	symbolCell.setBorderWidthBottom(BORDER_WIDTH);
 			            }
 
 			            // Iterate over columns in the current row on the current page
@@ -207,31 +210,31 @@ public class PatternWriter {
 							if (col%10 == 0) {
 
 								// Current column has thicker left border
-								cell1.setBorderWidthLeft(BORDER_WIDTH/2);
-								cell1.setBorderWidthRight(BORDER_WIDTH/8);
+								symbolCell.setBorderWidthLeft(BORDER_WIDTH/2);
+								symbolCell.setBorderWidthRight(BORDER_WIDTH/8);
 
 							} else if (col%10 == 9) {
 
 								// Current column has a thicker right border
-								cell1.setBorderWidthLeft(BORDER_WIDTH/8);
-								cell1.setBorderWidthRight(BORDER_WIDTH/2);
+								symbolCell.setBorderWidthLeft(BORDER_WIDTH/8);
+								symbolCell.setBorderWidthRight(BORDER_WIDTH/2);
 
 							} else {
 
 								// Current column has no thick borders
-								cell1.setBorderWidthRight(BORDER_WIDTH/8);
-								cell1.setBorderWidthLeft(BORDER_WIDTH/8);
+								symbolCell.setBorderWidthRight(BORDER_WIDTH/8);
+								symbolCell.setBorderWidthLeft(BORDER_WIDTH/8);
 
 							}
 
 							// Set left border of whole pattern
 							if (col == 0) {
-								cell1.setBorderWidthLeft(BORDER_WIDTH);
+								symbolCell.setBorderWidthLeft(BORDER_WIDTH);
 							}
 
 							// Set right border of whole pattern
 							if (col == colors[0].length - 1) {
-								cell1.setBorderWidthRight(BORDER_WIDTH);
+								symbolCell.setBorderWidthRight(BORDER_WIDTH);
 							}
 
 							// Get symbol for this cell
@@ -242,14 +245,21 @@ public class PatternWriter {
 							if (currColor.getSymbol() == "") {
 								currColor.setSymbol(symbols.remove(rand.nextInt(symbols.size())));
 							}
-							cell1.setPhrase(new Paragraph(currColor.getSymbol(), mainFont));
+							symbolCell.setPhrase(new Paragraph(currColor.getSymbol(), mainFont));
 							// System.out.println(currColor.getSymbol());
 							// Increment total stitches of this color by 1
-							// presentColors.add(currColor);
 							// currColor.incrementStitchNum();
 
 							// Add cell to the table
-							table.addCell(cell1);
+							table.addCell(symbolCell);
+
+							// Add color to set of found colors
+							if (presentColors.add(currColor)) {
+								float currWidth = titleFont.getBaseFont().getWidthPoint(currColor.getName(), 10f);
+								if (longestId < currWidth) {
+									longestId = currWidth;
+								}
+							}
 						}
 						table.completeRow();
 					}
@@ -260,6 +270,79 @@ public class PatternWriter {
 					document.newPage();
 				}
 			}
+
+			// Write the Thread Chart after the pattern
+			ArrayList<Color> presentList = new ArrayList<Color>(presentColors);
+
+			PriorityQueue<Color> colorQueue = new PriorityQueue<Color>(presentColors.size(), new idSorter());
+			// Move elements of PRESENTCOLORS into the queue
+			for (int i = 0; i<presentList.size(); i++) {
+				colorQueue.offer(presentList.get(i));
+			}
+
+			// Set up Cells
+
+			symbolCell.setBorderWidthRight(BORDER_WIDTH/2);
+			symbolCell.setBorderWidthBottom(BORDER_WIDTH/2);
+			symbolCell.setBorderWidthTop(BORDER_WIDTH/2);
+			symbolCell.setBorderWidthLeft(BORDER_WIDTH/2);
+			symbolCell.setFixedHeight(11f);
+			symbolCell.setPaddingTop(-2f);
+
+			marker.setRowspan(1);
+			marker.setPhrase(new Paragraph());
+
+			PdfPCell colorCell = new PdfPCell(symbolCell);
+	        colorCell.setPhrase(new Paragraph());
+
+	        PdfPCell paletteCell = new PdfPCell(new Paragraph(paletteName, titleFont));
+	        paletteCell.setNoWrap(true);
+	        paletteCell.setPaddingTop(-1);
+	        paletteCell.setBorder(Rectangle.LEFT & Rectangle.RIGHT & Rectangle.TOP & Rectangle.BOTTOM);
+	        float paletteWidth = titleFont.getBaseFont().getWidthPoint(paletteName, 10f)/symbolCell.getFixedHeight();
+
+	        PdfPCell idCell = new PdfPCell(paletteCell);
+	        float idWidth = longestId/symbolCell.getFixedHeight();
+
+	        PdfPCell countCell = new PdfPCell(paletteCell);
+
+	        // Set up table
+	        PdfPTable chartTable = new PdfPTable(9);
+	        chartTable.setHorizontalAlignment(Element.ALIGN_LEFT);
+	        float[] widths = new float[]{1f, .5f, 1f, 2f, paletteWidth, 2f, idWidth, 2f, 1f};
+	        float totalWidth = 0.0f;
+	        for (float w : widths) {
+	           totalWidth += w;
+	        }
+	        chartTable.setTotalWidth(totalWidth*symbolCell.getFixedHeight());
+	        chartTable.setWidths(widths);
+	        chartTable.setLockedWidth(true);
+
+	        Paragraph p = new Paragraph();
+	        p.setIndentationLeft(36);
+
+	        // Iterate through colors in order of their ID
+			while(colorQueue.size() > 0) {
+				Color currColor = colorQueue.remove();
+				symbolCell.setPhrase(new Paragraph(currColor.getSymbol(), titleFont));
+				chartTable.addCell(symbolCell);
+				chartTable.addCell(marker);
+				colorCell.setBackgroundColor(new BaseColor(Color.toRGBint(Color.LABtoRGB(currColor.getChannels()))));
+				chartTable.addCell(colorCell);
+				chartTable.addCell(marker);
+				chartTable.addCell(paletteCell);
+				chartTable.addCell(marker);
+				idCell.setPhrase(new Paragraph(currColor.getName(), titleFont));
+				chartTable.addCell(idCell);
+				chartTable.addCell(marker);
+				countCell.setPhrase(new Paragraph("(" + currColor.getStitchNum() + " stitches)", titleFont));
+				chartTable.addCell(countCell);
+				chartTable.completeRow();
+			}
+			p.add(chartTable);
+			document.add(p);
+
+
 			document.close();
 			writer.close();
 		} catch (DocumentException e) {

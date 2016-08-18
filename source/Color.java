@@ -164,4 +164,19 @@ public class Color {
 		}
 		return rgb;
 	}
+
+	public static double[] toRGBArray(int data) {
+		double b = (double)(data & 255);
+		double g = (double)((data >> 8) & 255);
+		double r = (double)((data >> 16) & 255);
+		return new double[]{r, g, b};
+	}
+
+	public static int toRGBint(double[] data) {
+		int c = 255 << 24;
+		for (int i = 0; i < 3; i++) {
+			c += (int)data[i] << ((2-i)*8);
+		}
+		return c;
+	}
 }

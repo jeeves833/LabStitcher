@@ -52,7 +52,7 @@ public class ColorConv {
 		String symbolName = c.readLine("Symbol file: ");
 		String saveName = c.readLine("Save file as: ");
 		System.out.println("Beginning color conversion");
-		BufferedImage newImage = replaceColors(img, reader.getColors(), useDither, saveName, symbolName, singleStitch);
+		BufferedImage newImage = replaceColors(img, reader.getColors(), useDither, saveName, symbolName, reader.getName(), singleStitch);
 
 		try {
 			ImageIO.write(newImage, "png", new File("../images/" + saveName + ".png"));
@@ -61,7 +61,8 @@ public class ColorConv {
 		}
 	}
 
-	private static BufferedImage replaceColors(BufferedImage img, ArrayList<Color> colors, Boolean dither, String saveName, String symbolName, Boolean singleOpt){
+	private static BufferedImage replaceColors(BufferedImage img, ArrayList<Color> colors, Boolean dither, String saveName, String symbolName, 
+		String paletteName, Boolean singleOpt){
 		// Create empty BufferedImage the same dimensions as IMG
 		int height = img.getHeight();
 		int width = img.getWidth();
@@ -88,7 +89,7 @@ public class ColorConv {
 
 				// Extract RGB data
 				int pixData = img.getRGB(x, y);
-				double[] rgb = toRGBArray(pixData);
+				double[] rgb = Color.toRGBArray(pixData);
 
 				// Convert RGB data to LAB data
 				double[] lab = Color.RGBtoLAB(rgb);
@@ -188,13 +189,13 @@ public class ColorConv {
 
 		for (int y = 0; y < height; y++) {
 			for (int x = 0; x < width ; x++) {
-				newImg.setRGB(x, y, toRGBint(Color.LABtoRGB(selectedColors[y][x].getChannels())));
+				newImg.setRGB(x, y, Color.toRGBint(Color.LABtoRGB(selectedColors[y][x].getChannels())));
 			}
 		}
 
 		// Save pattern
 		System.out.println("Writing Pattern");
-		PatternWriter.write(selectedColors, saveName, symbolName);
+		PatternWriter.write(selectedColors, saveName, symbolName, paletteName);
 
 		// Return image
 		return newImg;
@@ -247,19 +248,6 @@ public class ColorConv {
 		}
 	}
 
-	private static double[] toRGBArray(int data) {
-		double b = (double)(data & 255);
-		double g = (double)((data >> 8) & 255);
-		double r = (double)((data >> 16) & 255);
-		return new double[]{r, g, b};
-	}
-
-	private static int toRGBint(double[] data) {
-		int c = 255 << 24;
-		for (int i = 0; i < 3; i++) {
-			c += (int)data[i] << ((2-i)*8);
-		}
-		return c;
-	}
+	
 
 }

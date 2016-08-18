@@ -3,7 +3,7 @@ JC = javac
 SOURCE=../source/
 TARGET=./color/
 
-CLASSES = Color KdTree PaletteReader MostUsedColor SymbolReader PatternWriter ColorConv
+CLASSES = Color KdTree PaletteReader MostUsedColor SymbolReader idSorter PatternWriter ColorConv
 
 default: $(addprefix $(TARGET), $(addsuffix .class, $(CLASSES)))
 
