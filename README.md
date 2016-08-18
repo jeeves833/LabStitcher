@@ -1,7 +1,8 @@
 # LabStitcher
 A program for converting pictures into Cross Stitch patterns using the LAB color space.
 
-PROGRAM IS NOT YET COMPLETE - WIP
+AS OF 8/18/2016 ALL BASELINE FEATURES HAVE BEEN ADDED.  FULLY USEABLE PATTERNS ARE NOW GENERATED FROM ANY INPUT PICTURE.
+HAPPY STITCHING!
 
 Requirements for use:
 - iTextpdf (https://github.com/itext/itextpdf)
