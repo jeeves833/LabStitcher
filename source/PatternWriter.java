@@ -38,10 +38,10 @@ public class PatternWriter {
 			// Calculate the number of pages needed
 			int numPageRows = (int) Math.ceil((float)colors.length / (float)ROWS_PER_PAGE);
 			int numPageCols = (int) Math.ceil((float)colors[0].length / (float)COLUMNS_PER_PAGE);
-
+			int totalPages = numPageCols * numPageRows;
 			polling:
 			while (true) {
-				String poll = System.console().readLine("Pattern will be " + (numPageRows * numPageCols) 
+				String poll = System.console().readLine("Pattern will be " + totalPages 
 				+ " pages long (Not including color chart).  Continue? (y/n): ");
 				switch (poll) {
 					case "y":
@@ -97,10 +97,13 @@ public class PatternWriter {
 			marker.setRowspan(10);
 			marker.setVerticalAlignment(Element.ALIGN_TOP);
 			marker.setHorizontalAlignment(Element.ALIGN_LEFT);*/
-			
+
+			int currPage = 0;
+			System.out.print("\r0%");
 			// First iterate over pages rowWise
 			for (int pageRow = 0; pageRow < numPageRows; pageRow++) {
 				for (int pageCol = 0; pageCol < numPageCols; pageCol++) {
+					currPage++;
 					document.add(new Paragraph(filename, titleFont));
 					// The row and column of the top left square in the page
 					int startRow = pageRow * ROWS_PER_PAGE;
@@ -280,6 +283,7 @@ public class PatternWriter {
 					pageNum.setAlignment(Element.ALIGN_RIGHT);
 					document.add(pageNum);
 					document.newPage();
+					System.out.print("\r" + currPage*100/totalPages + "%");
 				}
 			}
 
