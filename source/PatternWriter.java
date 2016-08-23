@@ -27,7 +27,7 @@ public class PatternWriter {
 	private static final int COLUMNS_PER_PAGE = 83;
 	private static final float BORDER_WIDTH = .75f;
 
-	public static void write(Color[][] colors, String filename, String symbolsFilename, String paletteName) {
+	public static Boolean write(Color[][] colors, String filename, String symbolsFilename, String paletteName) {
 		ArrayList<String> symbols = SymbolReader.readSymbolFile("../symbols/" + symbolsFilename + ".txt");
 		HashSet<Color> presentColors = new HashSet<Color>();
 		float longestId = 0.0f;
@@ -39,9 +39,21 @@ public class PatternWriter {
 			int numPageRows = (int) Math.ceil((float)colors.length / (float)ROWS_PER_PAGE);
 			int numPageCols = (int) Math.ceil((float)colors[0].length / (float)COLUMNS_PER_PAGE);
 
-			// if (numPageRows * numPageCols > 10) {
-				// if (System.console().readline("WARNING")
-			// }
+			polling:
+			while (true) {
+				String poll = System.console().readLine("Pattern will be " + (numPageRows * numPageCols) 
+				+ " pages long (Not including color chart).  Continue? (y/n): ");
+				switch (poll) {
+					case "y":
+						break polling;
+					case "n":
+						System.out.println("Aborting pattern Write");
+						return false;
+					default:
+						break;
+				}
+			}
+			System.out.println("Writing Pattern");
 
 			// Set up document
 			PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream("../images/" + filename + ".pdf"));
@@ -85,7 +97,7 @@ public class PatternWriter {
 			marker.setRowspan(10);
 			marker.setVerticalAlignment(Element.ALIGN_TOP);
 			marker.setHorizontalAlignment(Element.ALIGN_LEFT);*/
-
+			
 			// First iterate over pages rowWise
 			for (int pageRow = 0; pageRow < numPageRows; pageRow++) {
 				for (int pageCol = 0; pageCol < numPageCols; pageCol++) {
@@ -350,5 +362,6 @@ public class PatternWriter {
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
+		return true;
 	}
 }

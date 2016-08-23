@@ -194,7 +194,6 @@ public class ColorConv {
 		}
 
 		// Save pattern
-		System.out.println("Writing Pattern");
 		PatternWriter.write(selectedColors, saveName, symbolName, paletteName);
 
 		// Return image
