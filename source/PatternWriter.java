@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.PriorityQueue;
+import java.util.Collections;
  
 import com.itextpdf.text.Document;
 import com.itextpdf.text.Element;
@@ -289,12 +290,13 @@ public class PatternWriter {
 
 			// Write the Thread Chart after the pattern
 			ArrayList<Color> presentList = new ArrayList<Color>(presentColors);
+			Collections.sort(presentList, new idSorter());
 
-			PriorityQueue<Color> colorQueue = new PriorityQueue<Color>(presentColors.size(), new idSorter());
+			// PriorityQueue<Color> colorQueue = new PriorityQueue<Color>(presentColors.size(), new idSorter());
 			// Move elements of PRESENTCOLORS into the queue
-			for (int i = 0; i<presentList.size(); i++) {
-				colorQueue.offer(presentList.get(i));
-			}
+			// for (int i = 0; i<presentList.size(); i++) {
+				// colorQueue.offer(presentList.get(i));
+			// }
 
 			// Set up Cells
 
@@ -338,8 +340,8 @@ public class PatternWriter {
 	        p.setIndentationLeft(36);
 
 	        // Iterate through colors in order of their ID
-			while(colorQueue.size() > 0) {
-				Color currColor = colorQueue.remove();
+			for (int i = 0; i < presentList.size(); i++) {
+				Color currColor = presentList.get(i);
 				symbolCell.setPhrase(new Paragraph(currColor.getSymbol(), titleFont));
 				chartTable.addCell(symbolCell);
 				chartTable.addCell(marker);
