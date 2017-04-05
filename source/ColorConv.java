@@ -24,6 +24,8 @@ public class ColorConv {
             System.err.println("No console.");
             System.exit(1);
         }
+        System.out.print("\033[H\033[2J");  
+	    System.out.flush(); 
         String paletteName = c.readLine("Palette file: ");
     	File paletteFile = new File("../palettes/" + paletteName + ".xml");
     	PaletteReader reader = new PaletteReader(paletteFile);
