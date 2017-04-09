@@ -9,12 +9,14 @@ import java.awt.image.ColorConvertOp;
 import java.awt.color.ColorSpace;
 import java.awt.image.WritableRaster;
 import java.awt.image.DataBuffer;
+import java.awt.Image;
 import java.util.Arrays;
 import java.io.Console;
 import java.util.HashSet;
 import java.util.PriorityQueue;
 import java.util.Iterator;
 import java.util.ArrayList;
+import java.awt.Graphics2D;
 
 public class ColorConv {
 	
@@ -46,21 +48,44 @@ public class ColorConv {
 		    }
 		}
 
-		System.out.println("Resulting pattern will be " + img.getWidth() + " stitches wide by " 
-			+ img.getHeight() + " stitches high.");
+		Boolean sizeFlag = false;
+		BufferedImage resizedImage = img;
+		while (true) {
+			System.out.println("Resulting pattern will be " + resizedImage.getWidth() + " stitches wide by " 
+			+ resizedImage.getHeight() + " stitches high.");
+			sizeFlag = c.readLine("Is this ok? (y/n): ").equals("y");
+			if (sizeFlag) {
+				break;
+			} else {
+				System.out.println("What size would you like the pattern to be?");
+				int newW = Integer.parseInt(c.readLine("Width: "));
+				int newH = Integer.parseInt(c.readLine("Height: "));
+				resizedImage = resizeImage(resizedImage, newW, newH);
+			}
+		}
 
 		Boolean useDither = c.readLine("Use dithering? (y/n): ").equals("y");
 		Boolean singleStitch = c.readLine("Use single-stitch optimization? (y/n): ").equals("y");
 		String symbolName = c.readLine("Symbol file: ");
 		String saveName = c.readLine("Save file as: ");
 		System.out.println("Beginning color conversion");
-		BufferedImage newImage = replaceColors(img, reader.getColors(), useDither, saveName, symbolName, reader.getName(), singleStitch);
+		BufferedImage newImage = replaceColors(resizedImage, reader.getColors(), useDither, saveName, symbolName, reader.getName(), singleStitch);
 
 		try {
 			ImageIO.write(newImage, "png", new File("../images/" + saveName + ".png"));
 		} catch (IOException e) {
 			System.out.println("Unable to save to file");
 		}
+	}
+
+	private static BufferedImage resizeImage(BufferedImage img, int newW, int newH) {
+		Image scaled = img.getScaledInstance(newW, newH, Image.SCALE_DEFAULT);
+		BufferedImage newImg = new BufferedImage(newW, newH, BufferedImage.TYPE_INT_RGB);
+
+		Graphics2D g2d = newImg.createGraphics();
+		g2d.drawImage(scaled, 0, 0, null);
+		g2d.dispose();
+		return newImg;
 	}
 
 	private static BufferedImage replaceColors(BufferedImage img, ArrayList<Color> colors, Boolean dither, String saveName, String symbolName, 
