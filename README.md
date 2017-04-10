@@ -12,21 +12,17 @@ To use:
 
 - This program is run in command line Java.  A MakeFile is included in the /build/ directory that will compile all the necessary source files.
 - Run the program from the /build/ directory with "java color/ColorConv"
-- You will be prompted for a Palette File
-- Enter the name of the desired palette file without the ".xml" tag
-  - e.g. "dmc"
-  - Palette files must be located in the /palettes/ directory
+- You will be prompted to view the current settings.
+  - Dithering will improve the look of colors not accessible by the current color palette.
+    - LabStitcher uses Floyd-Steinberg dithering
+  - SSO (Single Stitch Optimization) is a process that ensures stitches have neighbors of the same color.
+  - Symbols is the name of the file containing the symbols used for the pattern
+    - Symbol files must be located in /symbols/
+  - Palette is the name of the desired color palette
+    - Palette files must be located in /palettes/
 - Enter the full file name of the image you want converted
   - e.g. "test.png"
   - Images must be located in the /images/ directory
-- Choose if you want the resulting pattern to be dithered ("y" or "n")
-  - LabStitcher uses Floyd-Steinberg dithering
-- Choose if you want to apply Single Stitch Optimization to the pattern
-  - This finds stitches that do not have any matching neighbors and replaces them with a closely matching color
-  - Patterns optimized this way will have some compromises visually but will be much easier to stitch
-- Enter the name of the symbol file used for pattern writing
-  - e.g. "defaultSymbols"
-  - All symbol files must be located in /symbols/
 - Enter the name of the resulting pattern
   - All output images will be .png so you just need the name without the tag
     - e.g. "test_dmc"
