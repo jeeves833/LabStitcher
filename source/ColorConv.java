@@ -103,9 +103,9 @@ public class ColorConv {
 
 		Color[][] selectedColors = new Color[height][width];
 
-		double[][] distMatrix = new double[][]{{0,      0,      0},
-											   {0,      0,      0.4375},
-											   {0.1875, 0.3125, 0.0625}};
+		// double[][] distMatrix = new double[][]{{0,      0,      0},
+		// 									   {0,      0,      0.4375},
+		// 									   {0.1875, 0.3125, 0.0625}};
 
 		// Create Kd tree out of COLORS
 		KdTree searchTree = new KdTree(colors);
@@ -144,24 +144,26 @@ public class ColorConv {
 				presentColors.add(replacement);
 
 				// Calculate new error.
-				double[] newLab = replacement.getChannels();
+				if (dither) {
+					double[] newLab = replacement.getChannels();
 
-				for (int i = 0; i < 3; i++) {
-					currError[i] = lab[i] - newLab[i];
-				}
-
-				// Distribute to adjacent pixels
-				for (int i = 0; i < 3; i++) {
-					if (x < width - 1) {
-						error[y][x+1][i] += currError[i] * 0.4375;
+					for (int i = 0; i < 3; i++) {
+						currError[i] = lab[i] - newLab[i];
 					}
-					if (y < height-1) {
-						if (x > 0) {
-							error[y+1][x-1][i] += currError[i] * 0.1875;
-						}
-						error[y+1][x][i] += currError[i] * 0.3125;
+
+					// Distribute to adjacent pixels
+					for (int i = 0; i < 3; i++) {
 						if (x < width - 1) {
-							error[y+1][x+1][i] += currError[i] * 0.0625;
+							error[y][x+1][i] += currError[i] * 0.4375;
+						}
+						if (y < height-1) {
+							if (x > 0) {
+								error[y+1][x-1][i] += currError[i] * 0.1875;
+							}
+							error[y+1][x][i] += currError[i] * 0.3125;
+							if (x < width - 1) {
+								error[y+1][x+1][i] += currError[i] * 0.0625;
+							}
 						}
 					}
 				}
