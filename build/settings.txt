@@ -1,0 +1,4 @@
+Dithering: False
+SSO: True
+Symbols: defaultSymbols
+Palette: DMC

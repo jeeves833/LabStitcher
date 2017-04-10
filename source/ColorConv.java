@@ -17,6 +17,8 @@ import java.util.PriorityQueue;
 import java.util.Iterator;
 import java.util.ArrayList;
 import java.awt.Graphics2D;
+import java.io.FileReader;
+import java.io.BufferedReader;
 
 public class ColorConv {
 	
@@ -28,7 +30,83 @@ public class ColorConv {
         }
         System.out.print("\033[H\033[2J");  
 	    System.out.flush(); 
-        String paletteName = c.readLine("Palette file: ");
+	    System.out.println("Welcome to LabStitcher, the ultimate cross-stitch pattern generator");
+	    Boolean showSettings = c.readLine("Would you like to view the current settings before beginning? (y/n): ").equals("y");
+	    if (showSettings) {
+	    	System.out.println("Opening Settings File...");
+	    	System.out.println("=======================");
+	    }
+	    FileReader settingsFile = null;
+    	try {
+    		settingsFile = new FileReader("./settings.txt");
+    	} catch (IOException e) {
+    		System.out.println("Error: Settings File not found");
+    		System.out.println("Make sure settings.txt is in the top level of the 'build' folder and that you are running the program from the same folder");
+    		System.exit(1);
+    	}
+    	BufferedReader settingsReader = new BufferedReader(settingsFile);
+    	Boolean useDither = false;
+    	Boolean singleStitch = false;
+    	String symbolName = "";
+    	String paletteName = "";
+    	for (int i = 0; i < 4; i++) {
+    		String line = "";
+    		try {
+	    		line = settingsReader.readLine();
+	    	} catch (IOException e) {
+	    		System.out.println("Unable to read from settings.txt");
+	    		System.exit(1);
+	    	}
+	    	if (line == null) {
+	    		System.out.println("Settings.txt corrupted, please refer to the github source for correct file.");
+	    		System.exit(1);
+	    	}
+	    	if (showSettings) {
+	    		System.out.println(line);
+	    	}
+	    	String setting = line.split(": ")[0];
+	    	String value = line.split(": ")[1];
+	    	switch (setting) {
+	    		case "Dithering":
+	    			switch (value) {
+	    				case "True":
+	    					useDither = true;
+	    					break;
+    					case "False":
+    						useDither = false;
+    						break;
+						default:
+							System.out.println("Invalid value for Dithering Setting, must be 'True' or 'False'");
+							break;
+	    			}
+	    			break;
+    			case "SSO":
+	    			switch (value) {
+	    				case "True":
+	    					singleStitch = true;
+	    					break;
+    					case "False":
+    						singleStitch = false;
+    						break;
+						default:
+							System.out.println("Invalid value for SSO Setting, must be 'True' or 'False'");
+							break;
+	    			}
+	    			break;
+    			case "Symbols":
+    				symbolName = value;
+    				break;
+				case "Palette":
+					paletteName = value;
+					break;
+				default:
+					System.out.println("Settings.txt corrupted, please refer to the github source for correct file.");
+	    	}
+	    }
+	    if (showSettings) {
+	    	System.out.println("=======================");
+	    }
+        // String paletteName = c.readLine("Palette file: ");
     	File paletteFile = new File("../palettes/" + paletteName + ".xml");
     	PaletteReader reader = new PaletteReader(paletteFile);
     	System.out.println("Using palette \"" + reader.getName() + "\"");
@@ -64,9 +142,9 @@ public class ColorConv {
 			}
 		}
 
-		Boolean useDither = c.readLine("Use dithering? (y/n): ").equals("y");
-		Boolean singleStitch = c.readLine("Use single-stitch optimization? (y/n): ").equals("y");
-		String symbolName = c.readLine("Symbol file: ");
+		// Boolean useDither = c.readLine("Use dithering? (y/n): ").equals("y");
+		// Boolean singleStitch = c.readLine("Use single-stitch optimization? (y/n): ").equals("y");
+		// String symbolName = c.readLine("Symbol file: ");
 		String saveName = c.readLine("Save file as: ");
 		System.out.println("Beginning color conversion");
 		BufferedImage newImage = replaceColors(resizedImage, reader.getColors(), useDither, saveName, symbolName, reader.getName(), singleStitch);
